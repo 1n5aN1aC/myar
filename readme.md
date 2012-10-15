@@ -10,8 +10,18 @@ The goals of this plugin:
 
 Usage
 ---------
-<b>Read the full userguide here: [once I get around to it]</b>
 
+myar {arguments} archivefile ...
+
+arguments include:
+
+ * -q quickly append named files to archive
+ * -x extract named files
+ * -t print a concise table of contents of the archive
+ * -v print a verbose table of contents of the archive
+ * -d delete named files from archive
+ * -A quickly append all “regular” files in the current directory. (except the archive itself)
+ * -w EC: for a given timeout, add all modified files to the archive. (except the archive itself)
 
 License
 ----------
