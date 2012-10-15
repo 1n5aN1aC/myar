@@ -15,7 +15,7 @@
 
 int main(int argc, char **argv)
 {
-  int fg = open("test.txt", O_WRONLY | O_CREAT, S_IRWXU);
+  int fd = open("test.txt", O_WRONLY | O_CREAT, S_IRWXU);
   if (fd == -1)
   {
     perror("derp herp went wrong");
@@ -24,7 +24,7 @@ int main(int argc, char **argv)
   
   int array[] = {1,2,3,4,5};  //can use with structs as well as shortcut
   
-  int num_written write(fd, array, 5 * sizeof(int));   //sizeof(array[0])        //count is in bytes
+  int num_written = write(fd, array, 5 * sizeof(int));   //sizeof(array[0])        //count is in bytes
   
   if (close(fd) == -1) {
   
@@ -33,11 +33,3 @@ int main(int argc, char **argv)
   
   return 0;
 }
-
-
-
-man 2 open
-man 2 write
-man 2 read
-man 2 lseek
-man 2 fcntl  ?

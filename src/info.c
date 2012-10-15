@@ -3,13 +3,15 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <unistd.h>
 #include <stdbool.h>
+#include <string.h>
 
 #define BLOCKSIZE 4096
 
 bool isArchiveFile(string file) {
-	fd = open(file, O_RDONLY);
+	int fd = open(file, O_RDONLY);
 	if(fd == -1){
 		perror("Can't open input file");
 		exit(-1);
