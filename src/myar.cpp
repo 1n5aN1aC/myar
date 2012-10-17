@@ -6,10 +6,32 @@
 using namespace std;
 
 String archivePath;
-int archiveFd = 0;
+int archiveFdRd = 0;
+int archiveFdWr = 0;
 
-bool setArchive(String path, bool check);
-int openArchive();
+bool openArchiveRead(String path);
+{
+	archivePath = path;
+	archiveFdRd = open(path, O_RDONLY);
+	if(fd == -1){
+		perror("Can't open input file");
+		exit(-1);
+		return false;
+	}
+	string head = "";
+	if(fd == 0) {
+		lseek(fd, SEEK_SET, 0);
+		read(fd, head, 7);
+		if (head == "!<arch>") {
+			return true;
+		}
+		else {
+			return false;
+			perror("Not an archive file.");
+		}
+	}
+	return false;
+}
 bool closeArchive();
 
 void getShortList();
