@@ -6,3 +6,12 @@
 #pragma once
 
 // TODO: reference additional headers your program requires here
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <cstdlib>
+#include <unistd.h>
+#include <iomanip>
+#include <iostream>

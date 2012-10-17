@@ -1,11 +1,29 @@
 // myar.cpp : main project file.
 
 #include "stdinc.h"
+#include "ar.h"
 
-using namespace System;
+using namespace std;
 
-int main(array<System::String ^> ^args)
+String archivePath;
+int archiveFd = 0;
+
+bool setArchive(String path, bool check);
+int openArchive();
+
+void getShortList();
+void getFullList();
+bool fileIsInArchive(String file);
+
+bool writeFromArchive(String file);
+bool writeFromArchiveLoc(int start, int length);
+
+bool addToArchiveEnd(String file);
+bool addDirToArchiveEnd(String file);
+
+int main(int argc, char** argv)
 {
-    Console::WriteLine(L"Hello World");
-    return 0;
+    
+	
+	return 0;
 }
