@@ -10,6 +10,7 @@ int archiveFd = 0;
 
 bool setArchive(String path, bool check);
 int openArchive();
+bool closeArchive();
 
 void getShortList();
 void getFullList();
