@@ -37,7 +37,8 @@ int main(int argc, char** argv)
 	openArchiveRead("./ex.a", true);	//open files
 	openArchiveWrite("./ex.a");
 
-	int qflag, dflag, tflag, vflag, Aflag = 0;	//initialize junk
+	///*
+	int qflag, dflag, tflag, vflag, xflag, Aflag = 0;	//initialize junk
 	char *xvalue = NULL;
 	int index, c;
 	opterr = 0;
@@ -60,34 +61,36 @@ int main(int argc, char** argv)
 			case 'A':
 				Aflag = 1;
 				break;
+			case 'x':
+				xvalue = optarg;
+				xflag = 1;
+				break;
 			case '?':
 				if (optopt == 'x')
-					fprintf (stderr, "Option -%c requires an argument.\n", optopt);
+					fprintf (stderr, "Option -%c requires an argument.\n", optopt);    //begin parsing arguments with arguments..... lol
 				else if (isprint (optopt))
 					fprintf (stderr, "Unknown option `-%c'.\n", optopt);
 				else
-					fprintf (stderr,
-						"Unknown option character `\\x%x'.\n",
-						optopt);
+					fprintf (stderr, "Unknown option character `\\x%x'.\n", optopt);
 					return 1;
 				default:
 					abort ();
-					//cout << HELP;
-					//code by joshua villwock.  do not copy for assignment
 		}
-	if (tflag == 1)
-		if (vflag == 1)
-			returnFullList();
+	if (tflag == 1)							//if -t
+		if (vflag == 1)						//and -v
+			returnFullList();				//then full list
 		else
-			returnShortList();
-	else if (vflag == 1)
+			returnShortList();				//not -v, but -t so short list
+	else if (vflag == 1)					//just -v tell them they done goofed up.
 		cout << endl << HELP << endl << "-v requires -t" << endl << endl;
 
-	printf ("xvalue = %s\n", xvalue);
-     
+	if (xflag == 1)							//if -x
+		printf ("you wish to extract file: = %s\n", xvalue);																							//TODO- add extraction.
+
 	for (index = optind; index < argc; index++)
 		printf ("Non-option argument %s\n", argv[index]);
 	return 0;
+	//*/
 
 	closeArchive();
 	return 0;
