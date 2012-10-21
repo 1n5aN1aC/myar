@@ -21,7 +21,6 @@ bool openArchiveRead(string path, bool check);
 bool openArchiveWrite(string path);
 bool closeArchive();
 string charToString(char chAr[], int num);
-void readHeaderAt(int start, int arrayLoc);
 ar_hdr getHeaderAt(int start);
 bool getList();
 void returnShortList();
@@ -35,7 +34,7 @@ bool addDirToArchiveEnd(string file);
 int main(int argc, char** argv)
 {
 	int  i;
-	int qflag, dflag, tflag, vflag, xflag, Aflag = 0;	//initialize junk
+	int qflag, dflag, xflag, Aflag = 0;	//initialize junk
 	char *flags = NULL;
 	char *afile = NULL;
 	string* argList = new string[8];
@@ -55,18 +54,23 @@ int main(int argc, char** argv)
 	openArchiveRead(afile, true);	//open files
 	openArchiveWrite(afile);
 
-	if (strstr(flags, "t") != NULL)					//if -t
+	if (strstr(flags, "t") != NULL)					//if -t  quick file list
 		returnShortList();
-	else if (strstr(flags, "v") != NULL)			//if -v
+	else if (strstr(flags, "v") != NULL)			//if -v  verbose file list
 		returnFullList();
-	else if (strstr(flags, "q") != NULL)			//if -q
+	else if (strstr(flags, "q") != NULL)			//if -q  append file to archive
 		qflag = 1;
-	else if (strstr(flags, "x") != NULL)			//if -x
+	else if (strstr(flags, "x") != NULL)			//if -x  extract file(s)
 		xflag = 1;
-	else if (strstr(flags, "d") != NULL)			//if -d
+	else if (strstr(flags, "d") != NULL)			//if -d  delete files
 		dflag = 1;
-	else if (strstr(flags, "A") != NULL)			//if -A
+	else if (strstr(flags, "A") != NULL)			//if -A  append all in folder
 		Aflag = 1;
+	else {
+		cout << endl << HELP << endl;
+		cout << "Unknown option character: " << flags << endl;
+		kill("Unknown option character");
+	}
 
 	closeArchive();
 	return 0;
@@ -129,14 +133,6 @@ string charToString(char inArray[], int num) {
 		final += inArray[i];
 	}
 	return final;
-}
-void readHeaderAt(int start, int arrayLoc) {
-	lseek(archiveFdRd, start, SEEK_SET);								//seek to where the header starts
-	struct ar_hdr* h = (struct ar_hdr*)malloc(sizeof(struct ar_hdr));	//Create a temporary struct.
-	read(archiveFdRd, h, sizeof(struct ar_hdr));						//Read into temporary struct
-
-	//cout << fileList[0].ar_name << endl;
-	//memcpy ( &fileList[arrayLoc], &h, sizeof(h) );					//Save read struct into struct array
 }
 ar_hdr getHeaderAt(int start) {
 	struct ar_hdr h = {};
