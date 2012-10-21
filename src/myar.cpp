@@ -25,9 +25,8 @@ ar_hdr getHeaderAt(int start);
 bool getList();
 void returnShortList();
 void returnFullList();
-bool fileIsInArchive(string file);
+
 bool writeFromArchive(string file);
-bool writeFromArchiveLoc(int start, int length);
 bool addToArchiveEnd(string file);
 bool addDirToArchiveEnd(string file);
 
@@ -48,7 +47,7 @@ int main(int argc, char** argv)
 			argList[i - 3] = argv[i];
 		}
 		if (i >= 10)
-			kill("too many arguments / files!  I can't handle all this awesomness!\n Please less than 10 arguments!");
+			kill("too many arguments / files!  I can't handle all this awesomness!\n Please use less than 10 arguments!");
 	}
 
 	openArchiveRead(afile, true);	//open files
@@ -144,7 +143,6 @@ ar_hdr getHeaderAt(int start) {
 	read(archiveFdRd, h.ar_gid, 6);
 	read(archiveFdRd, h.ar_mode, 8);
 	read(archiveFdRd, h.ar_size, 10);
-	//lseek(archiveFdRd, 2, SEEK_CUR);
 	read(archiveFdRd, h.ar_fmag, 2);
 
 	return h;
@@ -159,9 +157,6 @@ bool getList() {
 		loc = lseek(archiveFdRd, 0, SEEK_CUR) + atoi(fileList[i].ar_size);
 		i++;
 	}
-	//fileList[0] = getHeaderAt(6);
-	//int a = lseek(archiveFdRd, 0, SEEK_CUR) + atoi(fileList[0].ar_size);
-	//fileList[1] = getHeaderAt(a);
 	return true;
 }
 void returnShortList() {
@@ -170,8 +165,8 @@ void returnShortList() {
 	int i = 0;
 	while (!quit && i < sizeof(fileList)) {
 		if (!strncmp(fileList[i].ar_name, "", 1) == 0) {
-			cout << charToString(fileList[i].ar_name, 16) << endl;
-		}
+			cout << charToString(fileList[i].ar_name, 16) << endl;		//output filenames.
+		}																//NOT sanatised!
 		i ++;
 	}
 }
@@ -214,4 +209,8 @@ void returnFullList() {
 		i ++;
 		cout << endl;
 	}
+}
+
+bool writeFromArchive(string file) {
+
 }
