@@ -34,63 +34,39 @@ bool addDirToArchiveEnd(string file);
 
 int main(int argc, char** argv)
 {
-	openArchiveRead("./ex.a", true);	//open files
-	openArchiveWrite("./ex.a");
-
-	///*
+	int  i;
 	int qflag, dflag, tflag, vflag, xflag, Aflag = 0;	//initialize junk
-	char *xvalue = NULL;
-	int index, c;
-	opterr = 0;
-
-	while ((c = getopt (argc, argv, "qtvdAx:")) != -1)	//parse command line arguments
-		switch (c)
-		{
-			case 'q':
-				qflag = 1;
-				break;
-			case 't':
-				tflag = 1;
-				break;
-			case 'v':
-				vflag = 1;
-				break;
-			case 'd':
-				dflag = 1;
-				break;
-			case 'A':
-				Aflag = 1;
-				break;
-			case 'x':
-				xvalue = optarg;
-				xflag = 1;
-				break;
-			case '?':
-				if (optopt == 'x')
-					fprintf (stderr, "Option -%c requires an argument.\n", optopt);    //begin parsing arguments with arguments..... lol
-				else if (isprint (optopt))
-					fprintf (stderr, "Unknown option `-%c'.\n", optopt);
-				else
-					fprintf (stderr, "Unknown option character `\\x%x'.\n", optopt);
-					return 1;
-				default:
-					abort ();
+	char *flags = NULL;
+	char *afile = NULL;
+	string* argList = new string[8];
+ 
+    for (i = 0; i < argc; i++) {
+		if (i == 1)
+			flags = argv[i];
+		if (i == 2)
+			afile = argv[i];
+		if (i >= 3) {
+			argList[i - 3] = argv[i];
 		}
-	if (tflag == 1)							//if -t
-		if (vflag == 1)						//and -v
-			returnFullList();				//then full list
-		else
-			returnShortList();				//not -v, but -t so short list
-	else if (vflag == 1)					//just -v tell them they done goofed up.
-		cout << endl << HELP << endl << "-v requires -t" << endl << endl;
+		if (i >= 10)
+			kill("too many arguments / files!  I can't handle all this awesomness!\n Please less than 10 arguments!");
+	}
 
-	if (xflag == 1)							//if -x
-		printf ("you wish to extract file: = %s\n", xvalue);																							//TODO- add extraction.
+	openArchiveRead(afile, true);	//open files
+	openArchiveWrite(afile);
 
-	for (index = optind; index < argc; index++)
-		printf ("Non-option argument %s\n", argv[index]);
-	return 0;
-	//*/
+	if (strstr(flags, "t") != NULL)					//if -t
+		returnShortList();
+	else if (strstr(flags, "v") != NULL)			//if -v
+		returnFullList();
+	else if (strstr(flags, "q") != NULL)			//if -q
+		qflag = 1;
+	else if (strstr(flags, "x") != NULL)			//if -x
+		xflag = 1;
+	else if (strstr(flags, "d") != NULL)			//if -d
+		dflag = 1;
+	else if (strstr(flags, "A") != NULL)			//if -A
+		Aflag = 1;
 
 	closeArchive();
 	return 0;
