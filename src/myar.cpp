@@ -30,6 +30,8 @@ void returnShortList();
 void returnFullList();
 
 bool writeFromArchive();
+bool writeToFileFromArcLoc(string file, int loc, int length);
+
 bool addToArchiveEnd(string file);
 bool addDirToArchiveEnd(string file);
 
@@ -234,23 +236,40 @@ bool writeFromArchive() {
 	int loc = 8 + 60;
 
 	int i;
-	for (i = 0; i < 6; i++) {						//iterate through FileList
+	for (i = 0; i < 6; i++) {							//iterate through FileList
 		int j;
-		for (j = 0; j < sizeof(argList); j++) {		//iterate through argList
+		for (j = 0; j < sizeof(argList); j++) {			//iterate through argList
 			if (strcmp(argList[j].c_str(), fileList[i].ar_name) == 0) {
 				
-				cout << fileList[i].ar_name << endl;
+				cout << fileList[i].ar_name << endl;	//needs to call writeToFileFromArcLoc()
 				
 			}
 		}
 	}
-	
+	return true;
+}
+bool writeToFileFromArcLoc(string path, int loc, int length) {
 	char buf[BLOCKSIZE];
 	int num_read = 0;
+	int tot_read = 0;
 	int num_written = 0;
+	int location = 0;
 
+	int fd_write = open(path.c_str(), O_WRONLY, O_CREAT, O_APPEND);
+	if(fd_write == -1)
+		return kill("Can't open output file.");
+	
 	lseek(archiveFdRd, loc, SEEK_SET);
-	read(archiveFdRd, buf, 1000);
+	while(num_read < length) {
+		if (length - num_read < BLOCKSIZE)
+			num_read += read(archiveFdRd, buf, length - num_read);
+		else
+			num_read += read(archiveFdRd, buf, BLOCKSIZE);
+		num_written += write(fd_write, buf, num_read);
+	}
 
+
+
+	close(fd_write);
 	return true;
 }

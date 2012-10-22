@@ -49,8 +49,6 @@ int main(int argc, char **argv)
 			unlink(output);
 			exit(-1);
 		}
-		
-		//lseek(in_fd, -2, SEEK_CUR);
 
 	}
 
