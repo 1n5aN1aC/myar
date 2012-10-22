@@ -41,14 +41,19 @@ int main(int argc, char** argv)
 	char *afile = NULL;
  
     for (i = 0; i < argc; i++) {
-		if (i == 1)
+		if (i == 1 && argc > 1)
 			flags = argv[i];
-		else if (i == 2)
+		else if (i == 2 && argc > 2)
 			afile = argv[i];
-		else if (i >= 3)
+		else if (i >= 3 && argc > 3)
 			argList[i - 3] = argv[i];
-		else if (i >= 10)
-			kill("too many arguments / files!  I can't handle all this awesomness!\n Please use less than 10 arguments!");
+		else if (i >= 10 && argc > 10)
+			return kill("too many arguments / files!  I can't handle all this awesomness!\n Please use less than 10 arguments!");
+	}
+
+	if (argc < 3) {
+		cout << HELP << endl;
+		return kill("Improper use of Myar");
 	}
 
 	openArchiveRead(afile, true);	//open files
@@ -66,12 +71,10 @@ int main(int argc, char** argv)
 		dflag = 1;
 	else if (strstr(flags, "A") != NULL)			//if -A  append all in folder
 		Aflag = 1;
-	else if (strstr(flags, "h") != NULL)
-		cout << HELP;
 	else {
 		cout << endl << HELP << endl;
 		cout << "Unknown option character: " << flags << endl;
-		kill("Unknown option character");
+		return kill("Unknown option character");
 	}
 
 	closeArchive();
@@ -174,7 +177,7 @@ void fixList() {
 				fileList[i].ar_name[j] = '\0';		//null (end of string)
 			j++;
 		}
-		i++;
+		i++;										//TODO- check for valid ARFMAG
 	}
 }
 void returnShortList() {
@@ -234,17 +237,13 @@ bool writeFromArchive() {
 	for (i = 0; i < 6; i++) {						//iterate through FileList
 		int j;
 		for (j = 0; j < sizeof(argList); j++) {		//iterate through argList
-
-			if (strncmp(argList[j].c_str(), fileList[i].ar_name, sizeof(argList[j])-1) == 0) {
-
-				cout << fileList[i].ar_name << endl;;
+			if (strcmp(argList[j].c_str(), fileList[i].ar_name) == 0) {
+				
+				cout << fileList[i].ar_name << endl;
 				
 			}
-			else
-				loc = loc + atoi(fileList[i].ar_size);
 		}
 	}
-
 	
 	char buf[BLOCKSIZE];
 	int num_read = 0;
@@ -253,27 +252,5 @@ bool writeFromArchive() {
 	lseek(archiveFdRd, loc, SEEK_SET);
 	read(archiveFdRd, buf, 1000);
 
-	/*
-	while((num_read = read(in_fd, buf, BLOCKSIZE)) > 0){
-		num_written = write(out_fd, buf, num_read);
-		
-		while(num_read != num_written){
-			num_read -= num_written;
-			location += num_written;
-			num_written = write(out_fd, buf + location, num_read);
-		}
-
-		if (num_written == -1){
-			perror("error writing - deleting output file");
-			unlink(output);
-			exit(-1);
-		}
-		
-		//lseek(in_fd, -2, SEEK_CUR);
-
-	}
-	*/
-
-	//cout << buf;
 	return true;
 }
