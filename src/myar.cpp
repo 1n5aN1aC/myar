@@ -1,17 +1,19 @@
 // myar.cpp : main project file.
 
 #include "stdinc.h"
-#include "ar.h"
+#include "/usr/include/ar.h"
 #include "file_stat.c"
 
 using namespace std;
 
 #define HELP "Correct Program Usage:\n-q quickly append files\n-x extract files\n-t print short File list\n-v print a verbose File list\n-d delete files\n-A quickly append all files in current directory\n"
+#define BLOCKSIZE 4096
 
 string archivePath;  //Path to the archive file we are opening / reading.
 int archiveFdRd = -2; //FileDescriptor for Reading.
 int archiveFdWr = -2; //FileDescriptor for writing.
 ar_hdr* fileList = new ar_hdr[100];
+string* argList = new string[8];
 
 //Method Declarations
 bool kill(string message);
@@ -23,30 +25,29 @@ bool closeArchive();
 string charToString(char chAr[], int num);
 ar_hdr getHeaderAt(int start);
 bool getList();
+void fixList();
 void returnShortList();
 void returnFullList();
 
-bool writeFromArchive(string file);
+bool writeFromArchive();
 bool addToArchiveEnd(string file);
 bool addDirToArchiveEnd(string file);
 
 int main(int argc, char** argv)
 {
 	int  i;
-	int qflag, dflag, xflag, Aflag = 0;	//initialize junk
+	int qflag, dflag, Aflag = 0;	//initialize junk
 	char *flags = NULL;
 	char *afile = NULL;
-	string* argList = new string[8];
  
     for (i = 0; i < argc; i++) {
 		if (i == 1)
 			flags = argv[i];
-		if (i == 2)
+		else if (i == 2)
 			afile = argv[i];
-		if (i >= 3) {
+		else if (i >= 3)
 			argList[i - 3] = argv[i];
-		}
-		if (i >= 10)
+		else if (i >= 10)
 			kill("too many arguments / files!  I can't handle all this awesomness!\n Please use less than 10 arguments!");
 	}
 
@@ -60,11 +61,13 @@ int main(int argc, char** argv)
 	else if (strstr(flags, "q") != NULL)			//if -q  append file to archive
 		qflag = 1;
 	else if (strstr(flags, "x") != NULL)			//if -x  extract file(s)
-		xflag = 1;
+		writeFromArchive();
 	else if (strstr(flags, "d") != NULL)			//if -d  delete files
 		dflag = 1;
 	else if (strstr(flags, "A") != NULL)			//if -A  append all in folder
 		Aflag = 1;
+	else if (strstr(flags, "h") != NULL)
+		cout << HELP;
 	else {
 		cout << endl << HELP << endl;
 		cout << "Unknown option character: " << flags << endl;
@@ -157,28 +160,42 @@ bool getList() {
 		loc = lseek(archiveFdRd, 0, SEEK_CUR) + atoi(fileList[i].ar_size);
 		i++;
 	}
+	fixList();
 	return true;
+}
+void fixList() {
+	int i = 0;
+	while (i < sizeof(fileList)) {
+		int j = 0;
+		char let = ' ';
+		while (j < 15) {
+			let = fileList[i].ar_name[j];
+			if (let == '/')
+				fileList[i].ar_name[j] = '\0';		//null (end of string)
+			j++;
+		}
+		i++;
+	}
 }
 void returnShortList() {
 	getList();							//Parse File
-	bool quit = false;
 	int i = 0;
-	while (!quit && i < sizeof(fileList)) {
+	while (i < sizeof(fileList)) {
 		if (!strncmp(fileList[i].ar_name, "", 1) == 0) {
 			cout << charToString(fileList[i].ar_name, 16) << endl;		//output filenames.
 		}																//NOT sanatised!
+		fileList[i].ar_name[strlen(fileList[i].ar_name)-1] = '\0';		//TODO- check this
 		i ++;
 	}
 }
 void returnFullList() {
 	getList();							//Parse File
-	bool quit = false;
 	int i = 0;
 	int j = 0;
 	time_t t;
 	struct tm *gmp, *locp;
 	struct tm gm, loc;
-	while (!quit && i < sizeof(fileList)) {
+	while (i < sizeof(fileList)) {
 		if (!strncmp(fileList[i].ar_name, "", 1) == 0) {
 			cout << file_perm_string(atoi(fileList[i].ar_mode), 0);		//ouput file attribute marks
 			if (atoi(fileList[i].ar_size) <= 99999);
@@ -193,9 +210,7 @@ void returnFullList() {
 			t = atol(fileList[i].ar_date);
 			locp = localtime(&t);										//get local time
 			loc = *locp;
-			if (loc.tm_min == 0)										//hack for 0 spacing.
-				loc.tm_min = 00;
-			printf("%d %d %d:%d0 %d",									//mostly working date
+			printf("%d %d %02d:%02d %d",									//mostly working date
 				loc.tm_mon, loc.tm_mday, loc.tm_hour, loc.tm_min, loc.tm_year);
 			cout << " ";												//spacer
 			int j = 0;
@@ -211,6 +226,54 @@ void returnFullList() {
 	}
 }
 
-bool writeFromArchive(string file) {
+bool writeFromArchive() {
+	getList();
+	int loc = 8 + 60;
 
+	int i;
+	for (i = 0; i < 6; i++) {						//iterate through FileList
+		int j;
+		for (j = 0; j < sizeof(argList); j++) {		//iterate through argList
+
+			if (strncmp(argList[j].c_str(), fileList[i].ar_name, sizeof(argList[j])-1) == 0) {
+
+				cout << fileList[i].ar_name << endl;;
+				
+			}
+			else
+				loc = loc + atoi(fileList[i].ar_size);
+		}
+	}
+
+	
+	char buf[BLOCKSIZE];
+	int num_read = 0;
+	int num_written = 0;
+
+	lseek(archiveFdRd, loc, SEEK_SET);
+	read(archiveFdRd, buf, 1000);
+
+	/*
+	while((num_read = read(in_fd, buf, BLOCKSIZE)) > 0){
+		num_written = write(out_fd, buf, num_read);
+		
+		while(num_read != num_written){
+			num_read -= num_written;
+			location += num_written;
+			num_written = write(out_fd, buf + location, num_read);
+		}
+
+		if (num_written == -1){
+			perror("error writing - deleting output file");
+			unlink(output);
+			exit(-1);
+		}
+		
+		//lseek(in_fd, -2, SEEK_CUR);
+
+	}
+	*/
+
+	//cout << buf;
+	return true;
 }
