@@ -233,18 +233,18 @@ void returnFullList() {
 
 bool writeFromArchive() {
 	getList();
-	int loc = 8 + 60;
+	int fileSizeSoFar = 0;
 
 	int i;
 	for (i = 0; i < 6; i++) {							//iterate through FileList
 		int j;
 		for (j = 0; j < sizeof(argList); j++) {			//iterate through argList
 			if (strcmp(argList[j].c_str(), fileList[i].ar_name) == 0) {
-				
-				cout << fileList[i].ar_name << endl;	//needs to call writeToFileFromArcLoc()
-				
+				cout << "Now writing file " << fileList[i].ar_name << " ...." << endl;
+				writeToFileFromArcLoc(charToString(fileList[i].ar_name, 16), 8 + (i+1)*60 + fileSizeSoFar , atoi(fileList[i].ar_size));
 			}
 		}
+		fileSizeSoFar += atoi(fileList[i].ar_size);
 	}
 	return true;
 }
@@ -253,23 +253,25 @@ bool writeToFileFromArcLoc(string path, int loc, int length) {
 	int num_read = 0;
 	int tot_read = 0;
 	int num_written = 0;
-	int location = 0;
 
-	int fd_write = open(path.c_str(), O_WRONLY, O_CREAT, O_APPEND);
+	int fd_write = open(path.c_str(), O_WRONLY | O_CREAT, S_IRWXU);
 	if(fd_write == -1)
-		return kill("Can't open output file.");
+		return kill("Can't open output file");
 	
+	lseek(fd_write, 0, SEEK_SET);
 	lseek(archiveFdRd, loc, SEEK_SET);
-	while(num_read < length) {
-		if (length - num_read < BLOCKSIZE)
-			num_read += read(archiveFdRd, buf, length - num_read);
+	while(tot_read < length) {
+		if (length - tot_read < BLOCKSIZE) {
+			num_read = read(archiveFdRd, buf, length - num_read);
+			tot_read += num_read;
+		}
 		else
 			num_read += read(archiveFdRd, buf, BLOCKSIZE);
-		num_written += write(fd_write, buf, num_read);
+		num_written += write(fd_write, buf, num_read);				//write
+		if (num_read != num_written)
+			return kill("Error Occured during writing");
+		num_read = 0;
 	}
-
-
-
 	close(fd_write);
 	return true;
 }
