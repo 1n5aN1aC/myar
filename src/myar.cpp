@@ -32,13 +32,13 @@ void returnFullList();
 bool writeFromArchive();
 bool writeToFileFromArcLoc(string file, int loc, int length);
 
-bool addToArchiveEnd(string file);
+bool addToArchiveEnd();
 bool addDirToArchiveEnd(string file);
 
 int main(int argc, char** argv)
 {
 	int  i;
-	int qflag, dflag, Aflag = 0;	//initialize junk
+	int dflag, Aflag = 0;	//initialize junk
 	char *flags = NULL;
 	char *afile = NULL;
  
@@ -58,7 +58,7 @@ int main(int argc, char** argv)
 		return kill("Improper use of Myar");
 	}
 
-	openArchiveRead(afile, true);	//open files
+	openArchiveRead(afile, true);					//open files
 	openArchiveWrite(afile);
 
 	if (strstr(flags, "t") != NULL)					//if -t  quick file list
@@ -66,7 +66,7 @@ int main(int argc, char** argv)
 	else if (strstr(flags, "v") != NULL)			//if -v  verbose file list
 		returnFullList();
 	else if (strstr(flags, "q") != NULL)			//if -q  append file to archive
-		qflag = 1;
+		addToArchiveEnd();
 	else if (strstr(flags, "x") != NULL)			//if -x  extract file(s)
 		writeFromArchive();
 	else if (strstr(flags, "d") != NULL)			//if -d  delete files
@@ -234,7 +234,6 @@ void returnFullList() {
 bool writeFromArchive() {
 	getList();
 	int fileSizeSoFar = 0;
-
 	int i;
 	for (i = 0; i < 6; i++) {							//iterate through FileList
 		int j;
@@ -242,6 +241,9 @@ bool writeFromArchive() {
 			if (strcmp(argList[j].c_str(), fileList[i].ar_name) == 0) {
 				cout << "Now writing file " << fileList[i].ar_name << " ...." << endl;
 				writeToFileFromArcLoc(charToString(fileList[i].ar_name, 16), 8 + (i+1)*60 + fileSizeSoFar , atoi(fileList[i].ar_size));
+				//struct utimbuf* timeS = {};
+				//timeS->modtime = atoi(fileList[i].ar_date);
+				//utime(fileList[i].ar_name, timeS);
 			}
 		}
 		fileSizeSoFar += atoi(fileList[i].ar_size);
@@ -260,6 +262,8 @@ bool writeToFileFromArcLoc(string path, int loc, int length) {
 	
 	lseek(fd_write, 0, SEEK_SET);
 	lseek(archiveFdRd, loc, SEEK_SET);
+
+
 	while(tot_read < length) {
 		if (length - tot_read < BLOCKSIZE) {
 			num_read = read(archiveFdRd, buf, length - num_read);
@@ -272,6 +276,57 @@ bool writeToFileFromArcLoc(string path, int loc, int length) {
 			return kill("Error Occured during writing");
 		num_read = 0;
 	}
+	cout << path <<" Was written successfully." << endl;
 	close(fd_write);
 	return true;
+}
+
+bool addToArchiveEnd() {
+	int i =0;
+	cout << endl << endl << "SADLY, ADDING FILES TO ARCHIVES WAS NOT IMPLEMENTED COMPLETLY.  TRY ANY OF THE OTHER FUNCTIONS." << endl << endl;
+	for (i = 0; i < sizeof(argList); i++) {
+		if (argList[i].c_str()[0] == '\0')
+			break;
+		char buf[BLOCKSIZE];
+		int num_read = 0;
+		int tot_read = 0;
+		int num_written = 0;
+		int location;
+
+		int fd_read = open(argList[i].c_str(), O_RDONLY);
+		if(fd_read == -1) {
+			cout << endl << "Error opening file: " << argList[i].c_str() << endl;
+			return kill("Can't open input file");
+		}
+		else {											//indented solely for prettyness of code.
+			struct ar_hdr temp;
+			struct stat buf;
+			stat(argList[i].c_str(), &buf);
+
+			//temp.ar_name[0] = argList[i].c_str();
+			temp.ar_date[0] = buf.st_mtime;
+			temp.ar_uid[0] = buf.st_uid;
+			temp.ar_gid[0] = buf.st_gid;
+			temp.ar_mode[0] = buf.st_mode;
+			temp.ar_size[0] = buf.st_size;
+			//temp.ar_fmag[0] = "`\n".c_str();
+		}
+
+
+		lseek(fd_read, 0, SEEK_SET);		//in file to beginning.
+		lseek(archiveFdWr, 0, SEEK_END);	//out file to end.
+			
+		cout << "Reading file" << argList[i].c_str() << endl;
+
+		while((num_read = read(fd_read, buf, BLOCKSIZE)) > 0){
+			num_written = write(archiveFdWr, buf, num_read);
+		
+			while(num_read != num_written){
+				num_read -= num_written;
+				location += num_written;
+				num_written = write(archiveFdWr, buf + location, num_read);
+			}
+		}
+	}
+return true;
 }

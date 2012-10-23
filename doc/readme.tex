@@ -110,6 +110,7 @@ It then iterates through the list of files in the archive, and in a nested loop,
 \begin{itemize}
 \item I have thoughly tested with ar, and it does not seem to preserve directories, at least not absolute directories.  Hence, myar will also discard absolute directories.
 \item If you specify the same file name twice, myar will sometimes extract the file twice to the same file, duplicating it.  Avoid this.
+\item If the file you specified is not in the archive, No error message will be displayed at this time.  Simply nothing will happen.
 \end{itemize}
 
 \subsection{Adding Files}
