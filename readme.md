@@ -8,6 +8,17 @@ The goals of this plugin:
  * Learn more about system calls in UNIX.
  * Learn more about C, as opposed to C++
 
+Compiling
+---------
+
+cd src
+make
+to compile myar
+
+cd doc
+make
+to compile readme & documentation
+ 
 Usage
 ---------
 
