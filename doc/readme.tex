@@ -108,21 +108,30 @@ It then iterates through the list of files in the archive, and in a nested loop,
 \subsubsection{Caveats}
 
 \begin{itemize}
-\item I have thoughly tested with ar, and it does not seem to preserve directories, at least not absolute directories.  Hence, myar will also discard absolute directories.
-\item If you specify the same file name twice, myar will sometimes extract the file twice to the same file, duplicating it.  Avoid this.
+\item I have thoughly tested with ar, and it does not seem to preserve directories, at least not absolute directories.  Hence, myar will also discard absolute directories when extracting.
+\item If you specify the same file name twice, myar will sometimes extract the file twice to the same file, duplicating it twice in a single file.  Avoid this.
 \item If the file you specified is not in the archive, No error message will be displayed at this time.  Simply nothing will happen.
 \end{itemize}
 
 \subsection{Adding Files}
 
-Not implemented in program yet.  :(
+Sadly due to time constraints, myar does not yet support inserting files into an archive, or creating a new one.
+
+Much of the code for this is in the program, and using myar -q will invode the partially finished code, however, headers are not written properly, and YOU WILL CORRUPT YOUR ARCHIVE FILE!
 
 \section{Work Log}
 
 Coming soon.  In the meantime, you can find a rough outline here:
+
 \url{https://github.com/1n5aN1aC/myar/commits/master}
 
 \section{Challenges}
+
+I learned that strings in C are super annoying, but using some builtin methods, and making a few of your own is a lifesaver.
+
+I had major problems with working with the struct, and I am not entirely satisfied with my solution, but the parts that are done work correctly, so...
+
+see "what did you learn" below for more info.
 
 \section{Questions And Answers}
 
@@ -135,7 +144,26 @@ Coming soon.  In the meantime, you can find a rough outline here:
 
 \subsection{how did you ensure your solution was correct? Testing details, for instance.}
 
-insert info here.
+Through testing was done using archives made with UNIX's ar.  Following is a list of all the test cases Performed that I can remember:
+
+\begin{itemize}
+\item myar with no arguments
+\item myar with one argument (flag) but no files specified
+\item myar -t ex.a
+\item myar -v ex.a
+\item myar -tv ex.a   (will handle first flag only)
+\item myar -t ex.a any amount of junk arguments
+\item myar -v ex.a any amount of junk arguments
+\item myar -t/v ex.a (where ex.a is empty) [file is corrupt]
+\item myar -t/v ex.a (where ex.a has a currupted armag) [file is corrupt]
+\item myar -x ex.a (no files to extract)
+\item myar -x ex.a derp herp (two files not in archive)
+\item myar -x ex.a thi1 (one file in archive)
+\item myar -x ex.a thi1 tha2 (two files in archive)
+\item myar -x ex.a thi1 derp (one file in archive, one not)
+\end{itemize}
+
+all the above command worked properly on files created with UNIXs ar.  There were several variations of options shown in this list that I did not list here, as they are very similar.
 
 \subsection{what did you learn?}
 
@@ -143,6 +171,9 @@ insert info here.
 \item Although I previously knew some C++ this assignment has been a rude awakening on the front of c-strings, character arrays and the like
 \item Overall, I would say I strongly dislike C from this couse so far.  I like my objects in Java / Python too much.
 \item Although, I have mostly learned how to work with structs and character arrays in C, even though I greatly dislike it.
+\item C is very frustrating to code in, and takes considerably longer than Java / Python (at least for me.)
 \end{itemize}
+
+See "Challenges" above for more info.
 
 \end{document}

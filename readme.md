@@ -11,7 +11,7 @@ The goals of this plugin:
 Usage
 ---------
 
-myar {arguments} archivefile ...
+myar <argument> <archivefile> [<filename>]...
 
 arguments include:
 
@@ -21,7 +21,3 @@ arguments include:
  * -v print a verbose table of contents of the archive
  * -d delete named files from archive
  * -A quickly append all “regular” files in the current directory. (except the archive itself)
-
-License
-----------
-This project has a LGPL license. Do whatever you want with it.<br>
