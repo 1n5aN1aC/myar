@@ -1,0 +1,133 @@
+\documentclass[letterpaper,10pt,titlepage]{article}
+
+\usepackage{graphicx}                                        
+
+\usepackage{amssymb}                                         
+\usepackage{amsmath}                                         
+\usepackage{amsthm}                                          
+
+\usepackage{alltt}                                           
+\usepackage{float}
+\usepackage{color}
+
+\usepackage{url}
+
+\usepackage{balance}
+\usepackage[TABBOTCAP, tight]{subfigure}
+\usepackage{enumitem}
+
+\usepackage{pstricks, pst-node}
+
+\usepackage{geometry}
+\geometry{textheight=9in, textwidth=6.5in}
+
+%random comment
+
+\newcommand{\cred}[1]{{\color{red}#1}}
+\newcommand{\cblue}[1]{{\color{blue}#1}}
+
+\usepackage{hyperref}
+
+\def\name{Joshua Villwock}
+
+%pull in the necessary preamble matter for pygments output
+\input{pygments.tex}
+
+%% The following metadata will show up in the PDF properties
+\hypersetup{
+  colorlinks = true,
+  urlcolor = black,
+  pdfauthor = {\name},
+  pdfkeywords = {cs311 ``operating systems'' files filesystem I/O},
+  pdftitle = {CS 311 Project 3: UNIX File I/O},
+  pdfsubject = {CS 311 Project 3},
+  pdfpagemode = UseNone
+}
+
+\parindent = 0.0 in
+\parskip = 0.2 in
+
+\begin{document}
+\tableofcontents
+
+\section{Overall System Design}
+
+\subsection{Overall Layout / theory}
+
+The overall design of the myar aplication is fairly straightforward.  When a user runs the program, the command line parser parses it, and determins what sub-sections of the program to run.
+
+It then opens the archive, after verifying that it begins with the proper ARMAG, and then executes the portion of the program that should deal with whatever action you wanted it to run.
+
+\subsection{Command Line Parsing}
+
+The parser here is fairly simple.  Initially, I was going to use getopt() but after re-reading the requirements, it appeared you wanted all the arguments first, with the files passed on the end, not right after the argument, as per standards.
+
+\begin{itemize}
+\item It starts with your first argument, (the flags, or options) and passes them into a variable to deal with later.
+\item Next it takes your second argument, (the path to the archive) and stores it into a variable to deal with later.
+\item Next, It will iterate through up to 7 more arguments, saving them into an array to be dealt with later.
+\item Then it double checks that you have provided enough / correct arguments.  If not, it dies with an error.
+\item Finally, It itterates through a list of acceptable arguments, and executes the proper portion of the program, based on whitchever one it encounters first.
+\item it will check arguments in the following order:
+\subitem -t
+\subitem -v
+\subitem -q
+\subitem -x
+\subitem -d
+\subitem -A
+\subitem errors out if nothing was found.
+\end{itemize}
+
+\subsubsection{Problems}
+
+There were major problems with passing invalid arguments (mainly not enough arguments) and the program crashing and burning.  However, Recently, most of these cases have been trapped, and should no longer ocour.
+
+\subsection{Listing files}
+
+After the archive has been verified, and opened for editing / reading, all archives and read modes are initially parsed the same way.  It starts by calling getList(), whether you wanted a quicklist, or the detailed list.
+
+getList() fetches the address of the end of the archive, initializes variables, and then begins looping through the file.  It starts imediently after ARMAG, and will read the first header, then convert the length of that header's file to an integer.
+
+It will then lseek that far through the file, to the next file header, and read the next one.  It continues through the file in this manner, until it finally seeks to or past the end of the file.
+
+Each time, it writes the file header into the global array of structs that stores all this data.
+
+Once that has finished, it will call fixList() which simple iterats through the list, removing trailing slashes, invalid files, and pretying up the list.  It then falls back into whichever form of list you asked for.  The simple list pretty much just outputs what is stored in the fixed list, while the detailed list is more complex.
+
+\subsection{Extracting Files}
+
+WIP.
+
+\subsection{Adding Files}
+
+Not implemented in program yet.  :(
+
+\section{Work Log}
+
+Coming soon.  In the meantime, you can find a rough outline here:
+\url{https://github.com/1n5aN1aC/myar/commits/master}
+
+\section{Challenges}
+
+\section{Questions And Answers}
+
+\subsection{what do you think the main point of this assignment is?}
+
+\begin{itemize}
+\item Make sure we know how to use all the tools of the course (C, tex, etc.)
+\item Get us used to basic system calls, and moving around inside of and reading/writing files.
+\end{itemize}
+
+\subsection{how did you ensure your solution was correct? Testing details, for instance.}
+
+insert info here.
+
+\subsection{what did you learn?}
+
+\begin{itemize}
+\item Although I previously knew some C++ this assignment has been a rude awakening on the front of c-strings, character arrays and the like
+\item Overall, I would say I strongly dislike C from this couse so far.  I like my objects in Java / Python too much.
+\item Although, I have mostly learned how to work with structs and character arrays in C, even though I greatly dislike it.
+\end{itemize}
+
+\end{document}
