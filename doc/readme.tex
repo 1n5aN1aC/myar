@@ -96,7 +96,21 @@ Once that has finished, it will call fixList() which simple iterats through the 
 
 \subsection{Extracting Files}
 
-WIP.
+Extracting files with myar is simple.  Simply use the command:
+\begin{itemize}
+\item myar -x <name of archive> <file to extract> [<another file to extract>]...
+\end{itemize}
+
+Internally, the commandline parser will parse through your arguments, and put all arguments after the name of the archive into an array to be used by this extraction process.
+
+It then iterates through the list of files in the archive, and in a nested loop, iterates through the arguments you passed it.  For all matches, it will call the function to actually extract said file to its file.
+
+\subsubsection{Caveats}
+
+\begin{itemize}
+\item I have thoughly tested with ar, and it does not seem to preserve directories, at least not absolute directories.  Hence, myar will also discard absolute directories.
+\item If you specify the same file name twice, myar will sometimes extract the file twice to the same file, duplicating it.  Avoid this.
+\end{itemize}
 
 \subsection{Adding Files}
 
